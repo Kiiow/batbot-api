@@ -24,4 +24,18 @@ public class BatbotApplication extends RepositoryRestConfigurerAdapter {
         System.out.println("BatBot API just Started !");
     }
 
+    @Override
+    public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
+        config.getCorsRegistry()
+                .addMapping("/**")
+                .allowedOrigins("*")
+                .allowedMethods("HEAD", "OPTIONS", "GET", "POST", "PUT", "DELETE")
+                .allowCredentials(false)
+                .maxAge(3600);
+        config.exposeIdsFor(User.class)
+               .exposeIdsFor(Command.class)
+               .exposeIdsFor(CommandCategory.class)
+               .exposeIdsFor(CommandDetail.class);
+    }
+
 }
