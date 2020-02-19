@@ -10,7 +10,7 @@ public class User implements Serializable {
     @Id
     @GeneratedValue
     @Column(name = "id")
-    private Long id;
+    private String id;
 
     @Column(name = "nickname")
     private String nickname;
@@ -39,7 +39,7 @@ public class User implements Serializable {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("User{");
-        sb.append("id=").append(id);
+        sb.append("id='").append(id).append('\'');
         sb.append(", nickname='").append(nickname).append('\'');
         sb.append(", level=").append(level);
         sb.append(", xp=").append(xp);
@@ -51,7 +51,7 @@ public class User implements Serializable {
         return sb.toString();
     }
 
-    public Long getId() { return id; }
+    public String getId() { return id; }
     public String getNickname() { return nickname; }
     public int getLevel() { return level; }
     public int getXp() { return xp; }
@@ -60,7 +60,7 @@ public class User implements Serializable {
     public String getUsername() { return username; }
     public String getDiscriminator() { return discriminator; }
 
-    public void setId(Long id) { this.id = id; }
+    public void setId(String id) { this.id = id; }
     public void setNickname(String nickname) { this.nickname = nickname; }
     public void setLevel(int level) { this.level = level; }
     public void setXp(int xp) { this.xp = xp; }
