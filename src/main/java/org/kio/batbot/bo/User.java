@@ -8,7 +8,6 @@ import java.util.Date;
 @Table(name = "user")
 public class User implements Serializable {
     @Id
-    @GeneratedValue
     @Column(name = "id")
     private String id;
 

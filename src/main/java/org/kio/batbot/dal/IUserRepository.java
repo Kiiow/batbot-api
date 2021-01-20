@@ -8,9 +8,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 @Repository
 public interface IUserRepository extends CrudRepository<User, String> {
+    List<User> findAllByOrderByXpDesc();
 
     @Modifying
     @Query("UPDATE User U SET U.xp = :xp, U.level = :level, U.ts_last_xp = CURRENT_TIMESTAMP WHERE U.id = :id")
