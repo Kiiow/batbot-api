@@ -1,0 +1,63 @@
+services:
+  - docker:dind
+
+stages:
+  - maven build
+  - docker build
+  - deploy
+
+variables:
+  CONTAINER_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+
+maven build:
+  image: maven:3.6.3-jdk-11
+  stage: maven build
+  script:
+    - mvn clean install
+  artifacts:
+    paths:
+      - target/*.jar
+
+docker build:
+  services:
+    - docker:18.09-dind
+  image: docker:18.09
+  stage: docker build
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $CONTAINER_REGISTRY_IMAGE .
+    - docker push $CONTAINER_REGISTRY_IMAGE
+  only:
+    refs:
+      - master
+      - dev
+
+depoy:
+  services:
+    - docker:18.09-dind
+  image: docker:18.09
+  stage: deploy
+  when: manual
+  before_script:
+    # Setup SSH key
+    - 'command -v ssh-agent >/dev/null || ( apk update && apk add openssh-client )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    # Script docker commands to deploy
+    - cat <<EOT >> docker-deploy-script.sh
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY;
+    - docker stop $DOCKER_INSTANCE_NAME;
+    - docker system prune -a -f;
+    - docker container run --name $DOCKER_INSTANCE_NAME -p 8080:8080 -d $CONTAINER_REGISTRY_IMAGE;
+    - docker logout
+    - EOT
+  script:
+    - ssh -o StrictHostKeyChecking=no root@$HOST_SERVER "/bin/bash -s " < docker-deploy-script.sh
+  environment:
+    name: integration
+    url: http://$HOST_SERVER
+  only:
+    refs:
+      - master
